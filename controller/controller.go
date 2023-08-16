@@ -27,29 +27,36 @@ func CreateUser(c *gin.Context) {
 }
 
 func VerifyUser(c *gin.Context) {
+	// if the cookie already exists redirect to profile
 	if _, err := c.Request.Cookie("Email"); err == nil {
 		c.Redirect(http.StatusSeeOther, "/profile")
-	} else {
+	} else { // if not exists verify credentials show the message
+
+		//getting the details from the form
 		FormEmail := c.PostForm("email")
 		FormPassword := c.PostForm("password")
 
+		//checking the form data with database
 		result := config.DB.Where(&models.User{Email: FormEmail, Password: FormPassword}).Find(&user)
+		// if the datas not found show invalid credentials
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"message": "Invalid credentials"})
+		} else { // if the data found create the cookie with email
+			cookie := http.Cookie{
+				Name:     "Email",
+				Value:    user.Email,
+				Path:     "/",
+				HttpOnly: true,
+			}
+			http.SetCookie(c.Writer, &cookie)
+			c.JSON(http.StatusAccepted, gin.H{"message": "User logged in"})
 		}
-		cookie := http.Cookie{
-			Name:     "Email",
-			Value:    user.Email,
-			Path:     "/",
-			HttpOnly: true,
-		}
-		http.SetCookie(c.Writer, &cookie)
-		c.JSON(http.StatusAccepted, gin.H{"message": "User logged in"})
 	}
 
 }
 
 func GetUser(c *gin.Context) {
+	// getting the user details with cookie
 	if Cookie, err := c.Request.Cookie("Email"); err == nil {
 		id := Cookie.Value
 		config.DB.Where("email = ?", id).First(&user)
