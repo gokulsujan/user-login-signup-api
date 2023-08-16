@@ -67,3 +67,27 @@ func GetUser(c *gin.Context) {
 	}
 
 }
+
+func UpdateUser(c *gin.Context) {
+	var body struct {
+		Name     string `json:"Name"`
+		Age      int    `json:"Age"`
+		Gender   string `json:"Gender"`
+		Mobile   string `json:"Mobile"`
+		Email    string `json:"Email"`
+		Password string `json:"Password"`
+	}
+	c.ShouldBindJSON(&body)
+
+	Cookie, _ := c.Request.Cookie("Email")
+	config.DB.Where("email = ?", Cookie.Value).First(&user)
+	result := config.DB.Model(&user).Updates(models.User{Name: body.Name, Age: body.Age, Gender: body.Gender, Mobile: body.Mobile, Email: body.Email, Password: body.Password})
+
+	if result.Error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": result.Error})
+		return
+	}
+
+	c.JSON(http.StatusAccepted, gin.H{"message": "Updated"})
+
+}
