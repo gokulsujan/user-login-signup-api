@@ -8,8 +8,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var user = models.User{}
+
 func CreateUser(c *gin.Context) {
-	user := models.User{}
 	//binding the json data to user fields
 	c.ShouldBindJSON(&user)
 	//Inserting into db
@@ -21,4 +22,11 @@ func CreateUser(c *gin.Context) {
 	}
 	//if error not occured
 	c.JSON(http.StatusAccepted, gin.H{"Message": "User details Inserted Successfully"})
+}
+
+func GetUser(c *gin.Context) {
+	id := c.Param("id")
+	config.DB.First(&user, id)
+	c.JSON(http.StatusAccepted, gin.H{"message": user})
+
 }

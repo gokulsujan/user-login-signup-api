@@ -19,6 +19,7 @@ func main() {
 		c.JSON(200, gin.H{"message": "hai"})
 	})
 	r.POST("/create_user", controller.CreateUser)
+	r.GET("/profile/:id", controller.GetUser)
 
 	r.Run()
 }
