@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func CreateUSer(c *gin.Context) {
+func CreateUser(c *gin.Context) {
 	user := models.User{}
 	//binding the json data to user fields
 	c.ShouldBindJSON(&user)
